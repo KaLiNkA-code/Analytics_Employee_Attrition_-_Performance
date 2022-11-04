@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 
 class Prepairing_data:
@@ -15,11 +15,10 @@ class Prepairing_data:
         self._test_target = pd.DataFrame
         self._test_X = pd.DataFrame
 
-    def data_split(self, target: str = "HourlyRate", count: int = 3) -> tuple:
+    def data_split(self, df, target: str = "HourlyRate", count: int = 3) -> tuple:
         """returned tuple with: train_target, train_X, val_target, val_X, test_target, test_X"""
-
         if count == 3:
-            train_df, val_test_df = train_test_split(self.dataset, train_size=0.6, random_state=0)
+            train_df, val_test_df = train_test_split(df, train_size=0.6, random_state=0)
             val_df, test_df = train_test_split(val_test_df, test_size=0.5, random_state=0)
 
             train_target = train_df[target]
@@ -42,18 +41,26 @@ class Prepairing_data:
 
     def prepairing(self, mode: str = None) -> pd.DataFrame:
         """Mode: normalize: norm || standart_scaller: st_s"""
+        columns = self.dataset.columns
 
-        scaler = StandardScaler()
+        scaler = MinMaxScaler(feature_range=(-1, 1))
         scaler.fit(self.dataset)
         if mode:
             if mode == "norm":
                 pass
-            elif mode == "st_s":
+            elif mode == "minmax":
                 pass
             else:
                 pass
         else:
-            return pd.DataFrame(scaler.transform(self.dataset))
+            return pd.DataFrame(scaler.transform(self.dataset), columns=columns)
+
+        # scaler = MinMaxScaler(feature_range=(0, 1))
+        # # Fit on the training data
+        # scaler.fit(X)
+        # # Transform both the training and testing data
+        # X = scaler.transform(X)
+        # X_test = scaler.transform(X_test)
 
     def first_prepairing(self) -> pd.DataFrame:
         self.dataset.loc[(self.dataset["BusinessTravel"] == "Travel_Rarely"), ("BusinessTravel")] = 1
